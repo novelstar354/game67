@@ -224,18 +224,7 @@ Resetしてください
 
 <div>賭けるもの</div>
 
-<select id="betSelect"><!--
-<option>100コイン</option>
-<option>1000コイン</option>
-<option>10000コイン</option>
-<option>大空</option>
-<option>山</option>
-<option>海</option>
-<option>太陽</option>
-<option>地球</option>
-<option>月</option>
-<option>光</option>
-<option>この世のすべて</option>-->
+<select id="betSelect">
 </select>
 <select id="gameSelect" onchange="updateGuessOptions()">
 <option>コイン</option>
@@ -654,17 +643,21 @@ lost:{
 
 
 function loadGame(){
-if(data.gameOver){
 
-document.getElementById("ending")
-.style.display = "flex";
-
-}
 const save =
 localStorage.getItem("ozoraSave");
 
 if(save){
 data = JSON.parse(save);
+}
+
+if(data.gameOver){
+
+document.getElementById("ending")
+.style.display = "flex";
+
+return;
+
 }
 
 updateCoins();
@@ -728,6 +721,7 @@ showScreen("home");
 }
 
 function playGame(){
+
 if(data.gameOver){
 
 alert("GAME OVER\nResetしてください");
@@ -735,6 +729,7 @@ alert("GAME OVER\nResetしてください");
 return;
 
 }
+
 const bet =
 document.getElementById("betSelect").value;
 
@@ -772,16 +767,22 @@ document.getElementById("result");
 
 document.body.classList.add("glitch");
 
+resultText.innerHTML =
+"運命を決定しています...";
+
 setTimeout(()=>{
 
 document.body.classList.remove("glitch");
 
 if(result === guess){
 
-data.coins += rewards[bet];
+const reward =
+rewards[bet] || 0;
+
+data.coins += reward;
 
 resultText.innerHTML =
-"勝利<br>+" + rewards[bet] + "コイン";
+"勝利<br>+" + reward + "コイン";
 
 flash();
 
@@ -806,15 +807,19 @@ if(bet === "この世のすべて"){
 data.gameOver = true;
 
 worldEnd();
+
 }
+
+}
+
 saveGame();
+
 updateCoins();
+
 updateBetOptions();
 
 },1200);
 
-resultText.innerHTML =
-"運命を決定しています...";
 }
 function updateGuessOptions(){
 
@@ -937,7 +942,7 @@ function worldEnd(){
 const end =
 document.getElementById("ending");
 
-
+end.style.display = "flex";
 
 }
 updateGameOptions();
