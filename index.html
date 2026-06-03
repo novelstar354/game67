@@ -179,7 +179,19 @@ margin-top:20px;
 <div class="flash" id="flash"></div>
 
 <div id="ending">
-なにもない
+<div style="text-align:center;">
+<div style="font-size:60px;">
+GAME OVER
+</div>
+
+<div style="font-size:20px;margin-top:20px;opacity:0.7;">
+この世のすべては失われた
+</div>
+
+<div style="font-size:16px;margin-top:40px;">
+Resetしてください
+</div>
+</div>
 </div>
 
 <!-- HOME -->
@@ -308,14 +320,25 @@ coins:1000,
 
 ownedBets:[
 "100コイン",
-"1000コイン"
+"1000コイン",
+"10000コイン",
+"大空",
+"山",
+"海",
+"太陽",
+"地球",
+"月",
+"光",
+"この世のすべて"
 ],
 
 ownedGames:[
 "コイン"
 ],
 
-lost:[]
+lost:[],
+
+gameOver:false
 };
 
 
@@ -414,17 +437,18 @@ const save =
 localStorage.getItem("ozoraSave");
 
 if(save){
-
 data = JSON.parse(save);
-updateGuessOptions();
 }
 
 updateCoins();
 updateBetOptions();
 renderShop();
 
-showScreen("home");
 updateGameOptions();
+updateGuessOptions();
+
+showScreen("home");
+
 };
 
 
@@ -442,7 +466,8 @@ data = {
 coins:1000,
 ownedBets:[
 "100コイン",
-"1000コイン"
+"1000コイン",
+"10000コイン"
 ],
 ownedGames:[
 "コイン"
@@ -533,7 +558,13 @@ list.appendChild(div);
    購入
 ========================= */
 function buyItem(name){
+if(data.gameOver){
 
+alert("GAME OVER\nResetしてください");
+
+return;
+
+}
 const item =
 shopItems.find(i=>i.name === name);
 
@@ -623,7 +654,12 @@ lost:{
 
 
 function loadGame(){
+if(data.gameOver){
 
+document.getElementById("ending")
+.style.display = "flex";
+
+}
 const save =
 localStorage.getItem("ozoraSave");
 
@@ -692,7 +728,13 @@ showScreen("home");
 }
 
 function playGame(){
+if(data.gameOver){
 
+alert("GAME OVER\nResetしてください");
+
+return;
+
+}
 const bet =
 document.getElementById("betSelect").value;
 
@@ -745,8 +787,6 @@ flash();
 
 }else{
 
-if(data.ownedBets.length > 1){
-
 if(!data.lost.includes(bet)){
 data.lost.push(bet);
 }
@@ -759,21 +799,14 @@ b => b !== bet
 resultText.innerHTML =
 "敗北<br>" + bet + "を失った";
 
-}else{
-
-resultText.innerHTML =
-"最後の賭けは失えない";
-
-}
-
 lossEffect();
 
 if(bet === "この世のすべて"){
+
+data.gameOver = true;
+
 worldEnd();
 }
-
-}
-
 saveGame();
 updateCoins();
 updateBetOptions();
@@ -904,19 +937,7 @@ function worldEnd(){
 const end =
 document.getElementById("ending");
 
-setTimeout(()=>{
 
-end.style.display = "flex";
-
-},1000);
-
-setTimeout(()=>{
-
-goHome();
-
-end.style.display = "none";
-
-},5000);
 
 }
 updateGameOptions();
