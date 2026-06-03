@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>大空を賭ける</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:sans-serif;
+background:black;
+color:white;
+overflow-x:hidden;
+min-height:100vh;
+}
+
+.screen{
+display:none;
+padding:20px;
+min-height:100vh;
+animation:fade 0.5s;
+}
+
+.active{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:scale(1.02);
+}
+to{
+opacity:1;
+transform:scale(1);
+}
+}
+
+h1{
+font-size:clamp(36px,8vw,70px);
+margin-bottom:30px;
+text-align:center;
+letter-spacing:5px;
+}
+
+button{
+width:min(90vw,400px);
+padding:18px;
+margin:10px;
+font-size:20px;
+border:none;
+border-radius:14px;
+background:#111;
+color:white;
+border:2px solid #444;
+transition:0.2s;
+}
+button{
+-webkit-tap-highlight-color:transparent;
+}
+button:active{
+transform:scale(0.96);
+}
+
+button:hover{
+background:#222;
+}
+
+.panel{
+width:min(95vw,700px);
+background:#111;
+padding:20px;
+border-radius:20px;
+border:1px solid #333;
+margin-top:20px;
+}
+
+select{
+width:100%;
+padding:16px;
+margin-top:15px;
+background:black;
+color:white;
+border:1px solid #555;
+border-radius:10px;
+font-size:18px;
+}
+
+.result{
+margin-top:25px;
+font-size:28px;
+text-align:center;
+min-height:60px;
+}
+
+.coin{
+font-size:24px;
+margin-bottom:20px;
+}
+
+.galleryImage{
+width:min(95vw,700px);
+height:55vh;
+object-fit:contain;
+background:black;
+border-radius:20px;
+margin-top:20px;
+border:2px solid #333;
+}
+
+.glitch{
+animation:glitch 0.12s infinite;
+}
+
+@keyframes glitch{
+0%{transform:translate(2px,0);}
+25%{transform:translate(-2px,1px);}
+50%{transform:translate(1px,-2px);}
+75%{transform:translate(-1px,2px);}
+100%{transform:translate(0,0);}
+}
+
+.flash{
+position:fixed;
+inset:0;
+background:white;
+pointer-events:none;
+opacity:0;
+}
+
+.flash.active{
+animation:flash 0.5s;
+}
+
+@keyframes flash{
+0%{opacity:1;}
+100%{opacity:0;}
+}
+
+#ending{
+position:fixed;
+inset:0;
+background:black;
+display:none;
+align-items:center;
+justify-content:center;
+font-size:50px;
+z-index:999;
+letter-spacing:10px;
+}
+
+.small{
+font-size:14px;
+opacity:0.6;
+margin-top:10px;
+}
+
+.galleryButtons{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="flash" id="flash"></div>
+
+<div id="ending">
+なにもない
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+
+<h1>大空を賭ける</h1>
+
+<button onclick="loadGame()">Play</button>
+<button onclick="openShop()">Shop</button>
+<button onclick="openGallery()">Gallery</button>
+<button onclick="resetGame()">Reset</button>
+
+
+<div class="small">
+失ったものは、戻らない。
+</div>
+
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+
+<h1>勝負</h1>
+
+<div class="coin" id="coinText">
+コイン : 1000
+</div>
+
+<div class="panel">
+
+<div>賭けるもの</div>
+
+<select id="betSelect"><!--
+<option>100コイン</option>
+<option>1000コイン</option>
+<option>10000コイン</option>
+<option>大空</option>
+<option>山</option>
+<option>海</option>
+<option>太陽</option>
+<option>地球</option>
+<option>月</option>
+<option>光</option>
+<option>この世のすべて</option>-->
+</select>
+<select id="gameSelect" onchange="updateGuessOptions()">
+<option>コイン</option>
+</select>
+<select id="guessSelect">
+<option>表</option>
+<option>裏</option>
+</select>
+
+<button onclick="playGame()">賭ける</button>
+
+<div class="result" id="result"></div>
+
+</div>
+
+<button onclick="goHome()">戻る</button>
+
+</div>
+
+<!-- GALLERY -->
+<div id="gallery" class="screen">
+
+<h1>Gallery</h1>
+
+<div class="galleryButtons">
+<button onclick="showGallery('大空')">大空</button>
+<button onclick="showGallery('山')">山</button>
+<button onclick="showGallery('海')">海</button>
+<button onclick="showGallery('太陽')">太陽</button>
+<button onclick="showGallery('地球')">地球</button>
+<button onclick="showGallery('月')">月</button>
+<button onclick="showGallery('光')">光</button>
+<button onclick="showGallery('この世のすべて')">この世のすべて</button>
+</div>
+
+<img id="galleryImage" class="galleryImage">
+
+<div class="result" id="galleryText"></div>
+
+<button onclick="goHome()">戻る</button>
+
+</div>
+<!-- SHOP -->
+<div id="shop" class="screen">
+
+<h1>SHOP</h1>
+<div class="coin" id="shopCoinText">
+コイン : 1000
+</div>
+
+<div id="shopList"></div>
+
+<button onclick="goHome()">
+戻る
+</button>
+
+</div>
+
+<script>
+
+const rewards = {
+"100コイン":50,
+"1000コイン":500,
+"10000コイン":5000,
+"大空":10000,
+"山":10000,
+"海":10000,
+"太陽":100000,
+"地球":100000,
+"月":100000,
+"光":200000,
+"この世のすべて":100000000
+};
+
+
+
+/* =========================
+   セーブデータ
+========================= */
+let data = {
+coins:1000,
+
+ownedBets:[
+"100コイン",
+"1000コイン"
+],
+
+ownedGames:[
+"コイン"
+],
+
+lost:[]
+};
+
+
+/* =========================
+   ショップ
+========================= */
+
+const shopItems = [
+
+
+
+{
+name:"大空",
+type:"bet",
+price:50000
+},
+
+{
+name:"山",
+type:"bet",
+price:50000
+},
+
+{
+name:"海",
+type:"bet",
+price:50000
+},
+
+{
+name:"太陽",
+type:"bet",
+price:500000
+},
+
+{
+name:"地球",
+type:"bet",
+price:500000
+},
+
+{
+name:"月",
+type:"bet",
+price:500000
+},
+
+{
+name:"光",
+type:"bet",
+price:1000000
+},
+
+{
+name:"この世のすべて",
+type:"bet",
+price:5000000
+},
+
+// 賭けゲーム追加
+
+{
+name:"サイコロ偶奇",
+type:"game",
+price:3000
+},
+
+{
+name:"赤黒カード",
+type:"game",
+price:5000
+}
+
+];
+
+/* =========================
+   自動セーブ
+========================= */
+
+function saveGame(){
+
+localStorage.setItem(
+"ozoraSave",
+JSON.stringify(data)
+);
+
+}
+
+/* =========================
+   起動時自動ロード
+========================= */
+
+window.onload = ()=>{
+
+const save =
+localStorage.getItem("ozoraSave");
+
+if(save){
+
+data = JSON.parse(save);
+updateGuessOptions();
+}
+
+updateCoins();
+updateBetOptions();
+renderShop();
+
+showScreen("home");
+updateGameOptions();
+};
+
+
+/* =========================
+   リセット
+========================= */
+
+function resetGame(){
+
+if(confirm("本当に全てを消しますか？")){
+
+localStorage.removeItem("ozoraSave");
+
+data = {
+coins:1000,
+ownedBets:[
+"100コイン",
+"1000コイン"
+],
+ownedGames:[
+"コイン"
+],
+lost:[]
+};
+
+saveGame();
+
+updateCoins();
+updateBetOptions();
+renderShop();
+
+alert("リセットしました");
+
+}
+
+}
+
+
+
+
+/* =========================
+   SHOP表示
+========================= */
+
+function openShop(){
+
+showScreen("shop");
+
+renderShop();
+
+}
+
+function renderShop(){
+
+const list =
+document.getElementById("shopList");
+
+list.innerHTML = "";
+
+shopItems.forEach(item=>{
+
+const div =
+document.createElement("div");
+
+div.className = "panel";
+
+div.innerHTML = `
+
+<h2>${item.name}</h2>
+
+<div>
+価格 : ${item.price} コイン
+</div>
+
+<div style="margin-top:10px;color:gray;">
+
+${
+(item.type === "bet" &&
+data.ownedBets.includes(item.name))
+||
+(item.type === "game" &&
+data.ownedGames.includes(item.name))
+?
+"所持済み"
+:
+"未所持"
+}
+
+</div>
+
+
+<button onclick="buyItem('${item.name}')"
+${((item.type === "bet" && data.ownedBets.includes(item.name)) ||
+(item.type === "game" && data.ownedGames.includes(item.name))) ? "disabled" : ""}>
+購入
+</button>
+`;
+
+list.appendChild(div);
+
+});
+
+}
+
+/* =========================
+   購入
+========================= */
+function buyItem(name){
+
+const item =
+shopItems.find(i=>i.name === name);
+
+if(!item) return;
+
+if(
+(item.type === "bet" &&
+data.ownedBets.includes(item.name))
+||
+(item.type === "game" &&
+data.ownedGames.includes(item.name))
+){
+alert("既に所持しています");
+return;
+}
+
+
+
+
+if(data.coins < item.price){
+
+alert("コイン不足");
+
+return;
+
+}
+
+data.coins -= item.price;
+
+if(item.type === "bet"){
+
+if(!data.ownedBets.includes(item.name)){
+
+data.ownedBets.push(item.name);
+
+}
+
+}else{
+
+if(!data.ownedGames.includes(item.name)){
+
+data.ownedGames.push(item.name);
+
+}
+
+}
+
+saveGame();
+
+updateCoins();
+updateBetOptions();
+
+alert(item.name + " を入手");
+renderShop();
+updateGuessOptions();
+updateGameOptions();
+}
+
+
+
+const galleryImages = {
+
+normal:{
+"大空":"https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+"山":"https://images.unsplash.com/photo-1464822759023-fed622ff2c3b",
+"海":"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+"太陽":"https://images.unsplash.com/photo-1470770841072-f978cf4d019e",
+"地球":"https://images.unsplash.com/photo-1446776811953-b23d57bd21aa",
+"月":"https://images.unsplash.com/photo-1532693322450-2cb5c511067d",
+"光":"https://images.unsplash.com/photo-1519608487953-e999c86e7455",
+"この世のすべて":"https://images.unsplash.com/photo-1462331940025-496dfbfc7564"
+},
+
+lost:{
+"大空":"https://images.unsplash.com/photo-1493246507139-91e8fad9978e",
+"山":"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+"海":"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+"太陽":"https://images.unsplash.com/photo-1504384308090-c894fdcc538d",
+"地球":"https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
+"月":"https://images.unsplash.com/photo-1519681393784-d120267933ba",
+"光":"https://images.unsplash.com/photo-1493246507139-91e8fad9978e",
+"この世のすべて":"https://images.unsplash.com/photo-1504384308090-c894fdcc538d"
+}
+
+};
+
+
+
+function loadGame(){
+
+const save =
+localStorage.getItem("ozoraSave");
+
+if(save){
+data = JSON.parse(save);
+}
+
+updateCoins();
+updateBetOptions();
+
+showScreen("game");
+
+}
+
+function updateGameOptions(){
+
+const select =
+document.getElementById("gameSelect");
+
+select.innerHTML = "";
+
+data.ownedGames.forEach(game=>{
+
+const option =
+document.createElement("option");
+
+option.value = game;
+option.textContent = game;
+
+select.appendChild(option);
+
+});
+
+}
+
+
+function updateCoins(){
+
+document.getElementById("coinText").innerText =
+"コイン : " + data.coins;
+
+const shopCoin =
+document.getElementById("shopCoinText");
+
+if(shopCoin){
+
+shopCoin.innerText =
+"コイン : " + data.coins;
+
+}
+
+}
+
+
+function showScreen(id){
+
+document.querySelectorAll(".screen")
+.forEach(s=>s.classList.remove("active"));
+
+document.getElementById(id)
+.classList.add("active");
+}
+
+function goHome(){
+showScreen("home");
+}
+
+function playGame(){
+
+const bet =
+document.getElementById("betSelect").value;
+
+const game =
+document.getElementById("gameSelect").value;
+
+const guess =
+document.getElementById("guessSelect").value;
+
+let result;
+
+if(game === "コイン"){
+
+result =
+Math.random() < 0.5 ? "表" : "裏";
+
+}
+
+else if(game === "サイコロ偶奇"){
+
+result =
+Math.random() < 0.5 ? "偶数" : "奇数";
+
+}
+
+else if(game === "赤黒カード"){
+
+result =
+Math.random() < 0.5 ? "赤" : "黒";
+
+}
+
+const resultText =
+document.getElementById("result");
+
+document.body.classList.add("glitch");
+
+setTimeout(()=>{
+
+document.body.classList.remove("glitch");
+
+if(result === guess){
+
+data.coins += rewards[bet];
+
+resultText.innerHTML =
+"勝利<br>+" + rewards[bet] + "コイン";
+
+flash();
+
+}else{
+
+if(data.ownedBets.length > 1){
+
+if(!data.lost.includes(bet)){
+data.lost.push(bet);
+}
+
+data.ownedBets =
+data.ownedBets.filter(
+b => b !== bet
+);
+
+resultText.innerHTML =
+"敗北<br>" + bet + "を失った";
+
+}else{
+
+resultText.innerHTML =
+"最後の賭けは失えない";
+
+}
+
+lossEffect();
+
+if(bet === "この世のすべて"){
+worldEnd();
+}
+
+}
+
+saveGame();
+updateCoins();
+updateBetOptions();
+
+},1200);
+
+resultText.innerHTML =
+"運命を決定しています...";
+}
+function updateGuessOptions(){
+
+const game =
+document.getElementById("gameSelect").value;
+
+const select =
+document.getElementById("guessSelect");
+
+select.innerHTML = "";
+
+let choices = [];
+
+if(game === "コイン"){
+choices = ["表","裏"];
+}
+
+else if(game === "サイコロ偶奇"){
+choices = ["偶数","奇数"];
+}
+
+else if(game === "赤黒カード"){
+choices = ["赤","黒"];
+}
+
+choices.forEach(choice=>{
+
+const option =
+document.createElement("option");
+
+option.value = choice;
+option.textContent = choice;
+
+select.appendChild(option);
+
+});
+
+}
+
+function flash(){
+
+const flash =
+document.getElementById("flash");
+
+flash.classList.add("active");
+
+setTimeout(()=>{
+flash.classList.remove("active");
+},500);
+
+}
+
+function lossEffect(){
+
+navigator.vibrate?.([100,50,100]);
+
+document.body.style.background = "#200";
+
+setTimeout(()=>{
+document.body.style.background = "black";
+},500);
+
+}
+
+function openGallery(){
+
+showScreen("gallery");
+
+showGallery("大空");
+}
+
+function showGallery(name){
+
+const img =
+document.getElementById("galleryImage");
+
+const text =
+document.getElementById("galleryText");
+
+if(data.lost.includes(name)){
+
+img.src = galleryImages.lost[name];
+
+text.innerHTML =
+name + "は失われた";
+
+}else{
+
+img.src = galleryImages.normal[name];
+
+text.innerHTML =
+name + "は存在している";
+
+}
+
+}
+
+// betSelect更新関数を追加
+function updateBetOptions(){
+const select = document.getElementById("betSelect");
+const current = select.value;
+
+select.innerHTML = "";
+
+data.ownedBets
+.filter(item => !data.lost.includes(item))
+.forEach(item => {
+const option = document.createElement("option");
+option.value = item;
+option.textContent = item;
+select.appendChild(option);
+});
+
+if([...select.options].some(o => o.value === current)){
+select.value = current;
+}
+}
+function worldEnd(){
+
+const end =
+document.getElementById("ending");
+
+setTimeout(()=>{
+
+end.style.display = "flex";
+
+},1000);
+
+setTimeout(()=>{
+
+goHome();
+
+end.style.display = "none";
+
+},5000);
+
+}
+updateGameOptions();
+</script>
+
+</body>
+</html>
