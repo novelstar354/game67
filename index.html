@@ -171,6 +171,9 @@ justify-content:center;
 gap:10px;
 margin-top:20px;
 }
+#ending{
+pointer-events:all;
+}
 </style>
 </head>
 
@@ -257,6 +260,8 @@ Resetしてください
 <button onclick="showGallery('地球')">地球</button>
 <button onclick="showGallery('月')">月</button>
 <button onclick="showGallery('光')">光</button>
+<button onclick="showGallery('時間')">時間</button>
+<button onclick="showGallery('運命')">運命</button>
 <button onclick="showGallery('この世のすべて')">この世のすべて</button>
 </div>
 
@@ -296,7 +301,9 @@ const rewards = {
 "地球":100000,
 "月":100000,
 "光":200000,
-"この世のすべて":100000000
+"この世のすべて":100000000,
+"時間":50000000,
+"運命":50000000
 };
 
 
@@ -386,7 +393,17 @@ name:"この世のすべて",
 type:"bet",
 price:5000000
 },
+{
+name:"時間",
+type:"bet",
+price:10000000
+},
 
+{
+name:"運命",
+type:"bet",
+price:50000000
+},
 // 賭けゲーム追加
 
 {
@@ -437,7 +454,15 @@ updateGameOptions();
 updateGuessOptions();
 
 showScreen("home");
+if(data.lost.includes("時間")){
 
+document.body.style.animation = "none";
+
+document.querySelectorAll("*").forEach(el=>{
+el.style.transition = "none";
+});
+
+}
 };
 
 
@@ -453,15 +478,28 @@ localStorage.removeItem("ozoraSave");
 
 data = {
 coins:1000,
+
 ownedBets:[
 "100コイン",
 "1000コイン",
-"10000コイン"
+"10000コイン",
+"大空",
+"山",
+"海",
+"太陽",
+"地球",
+"月",
+"光",
+"この世のすべて"
 ],
+
 ownedGames:[
 "コイン"
 ],
-lost:[]
+
+lost:[],
+
+gameOver:false
 };
 
 saveGame();
@@ -469,6 +507,10 @@ saveGame();
 updateCoins();
 updateBetOptions();
 renderShop();
+updateGameOptions();
+updateGuessOptions();
+
+document.getElementById("ending").style.display = "none";
 
 alert("リセットしました");
 
@@ -624,18 +666,22 @@ normal:{
 "地球":"https://images.unsplash.com/photo-1446776811953-b23d57bd21aa",
 "月":"https://images.unsplash.com/photo-1532693322450-2cb5c511067d",
 "光":"https://images.unsplash.com/photo-1519608487953-e999c86e7455",
+"時間":"https://images.unsplash.com/photo-1501139083538-0139583c060f?w=1200",
+"運命":"https://images.unsplash.com/photo-1462332420958-a05d1e002413?w=1200",
 "この世のすべて":"https://images.unsplash.com/photo-1462331940025-496dfbfc7564"
 },
 
 lost:{
-"大空":"https://images.unsplash.com/photo-1493246507139-91e8fad9978e",
-"山":"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-"海":"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-"太陽":"https://images.unsplash.com/photo-1504384308090-c894fdcc538d",
-"地球":"https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
-"月":"https://images.unsplash.com/photo-1519681393784-d120267933ba",
-"光":"https://images.unsplash.com/photo-1493246507139-91e8fad9978e",
-"この世のすべて":"https://images.unsplash.com/photo-1504384308090-c894fdcc538d"
+"大空":"",
+"山":"lostmountain.png",
+"海":"lostocean.png",
+"太陽":"lostsun.png",
+"地球":"lostearth.png",
+"月":"lostmoon.png",
+"光":"lostlight.png",
+"時間":"https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=1200",
+"運命":"https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200",
+"この世のすべて":"lostall.png"
 }
 
 };
@@ -729,7 +775,13 @@ alert("GAME OVER\nResetしてください");
 return;
 
 }
+if(data.ownedBets.length === 0){
 
+alert("賭けるものがない");
+
+return;
+
+}
 const bet =
 document.getElementById("betSelect").value;
 
@@ -945,7 +997,6 @@ document.getElementById("ending");
 end.style.display = "flex";
 
 }
-updateGameOptions();
 </script>
 
 </body>
